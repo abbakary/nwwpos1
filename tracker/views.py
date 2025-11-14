@@ -2617,9 +2617,9 @@ def orders_list(request: HttpRequest):
     revenue_today = 0
 
     # Get started orders KPIs (for the Started Orders view)
-    started_orders_qs = scope_queryset(Order.objects.filter(status='created'), request.user, request)
+    started_orders_qs = scope_queryset(Order.objects.filter(status='in_progress'), request.user, request)
     started_total = started_orders_qs.count()
-    started_pending = started_orders_qs.filter(status='created').count()
+    started_pending = started_orders_qs.filter(status='in_progress').count()
     started_completed = started_orders_qs.filter(status='completed').count()
 
     # Calculate documents uploaded (document_scans count)
