@@ -55,22 +55,22 @@ def create_service_types():
 def create_service_addons():
     """Create sample service addons"""
     service_addons_data = [
-        {"name": "Wheel Balancing", "estimated_minutes": 20},
-        {"name": "Tire Installation", "estimated_minutes": 30},
-        {"name": "Wheel Mounting", "estimated_minutes": 25},
-        {"name": "Tire Repair", "estimated_minutes": 15},
-        {"name": "Alignment Check", "estimated_minutes": 10},
-        {"name": "Suspension Inspection", "estimated_minutes": 20},
-        {"name": "Brake Fluid Replacement", "estimated_minutes": 25},
-        {"name": "Engine Cleaning", "estimated_minutes": 40},
-        {"name": "Cabin Air Filter", "estimated_minutes": 10},
-        {"name": "Battery Testing", "estimated_minutes": 10},
-        {"name": "Headlight Restoration", "estimated_minutes": 30},
-        {"name": "Undercarriage Wash", "estimated_minutes": 15},
-        {"name": "Transmission Fluid Flush", "estimated_minutes": 45},
-        {"name": "Differential Service", "estimated_minutes": 50},
-        {"name": "Engine Oil Top-up", "estimated_minutes": 5},
-        {"name": "Windshield Treatment", "estimated_minutes": 15},
+        {"name": "Wheel Balancing"},
+        {"name": "Tire Installation"},
+        {"name": "Wheel Mounting"},
+        {"name": "Tire Repair"},
+        {"name": "Alignment Check"},
+        {"name": "Suspension Inspection"},
+        {"name": "Brake Fluid Replacement"},
+        {"name": "Engine Cleaning"},
+        {"name": "Cabin Air Filter"},
+        {"name": "Battery Testing"},
+        {"name": "Headlight Restoration"},
+        {"name": "Undercarriage Wash"},
+        {"name": "Transmission Fluid Flush"},
+        {"name": "Differential Service"},
+        {"name": "Engine Oil Top-up"},
+        {"name": "Windshield Treatment"},
     ]
     
     service_addons = []
