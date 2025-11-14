@@ -725,7 +725,7 @@
                   <div class="category-description">
                     Upload receipts, photos, or additional files
                   </div>
-                  {% if order.status != 'completed' and order.status != 'cancelled' and order.type != 'inquiry' %}
+                  {% if order.status != 'cancelled' and order.type != 'inquiry' %}
                   <button type="button" class="btn btn-sm btn-outline-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#attachmentModal">
                     <i class="fa fa-upload me-1"></i>Upload Files
                   </button>
