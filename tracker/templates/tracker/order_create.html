@@ -117,15 +117,6 @@
               </div>
             </div>
           </div>
-          <div class="col-md-6 col-lg-3">
-            <div class="order-type-card card h-100 cursor-pointer border-2" data-order-type="quick">
-              <div class="card-body text-center">
-                <i class="fa fa-flash fs-1 text-warning mb-3 d-block"></i>
-                <h6 class="card-title">Quick Start</h6>
-                <p class="card-text small text-muted">Start an order with plate number</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -429,11 +420,6 @@
             console.log('Card clicked:', orderType);
 
             // Handle redirect cases first
-            if (orderType === 'quick') {
-              console.log('Redirecting to quick start');
-              window.location.href = '{% url "tracker:order_start" %}';
-              return;
-            }
 
             if (orderType === 'orders') {
               console.log('Redirecting to orders list');
@@ -775,11 +761,42 @@
       if (startOrderBtn && customerForm) {
         startOrderBtn.addEventListener('click', function(e) {
           e.preventDefault();
-          const customerId = document.querySelector('input[name="customer_id"]').value;
-          if (customerId) {
-            // Redirect to the order form for this customer with focus on upload
-            window.location.href = `/customers/${customerId}/order/new/?focus=upload`;
+          const customerIdEl = document.querySelector('input[name="customer_id"]');
+          const customerId = customerIdEl && customerIdEl.value ? customerIdEl.value : '';
+          if (!customerId) return;
+
+          const vehicleSelect = document.getElementById('{{ form.vehicle.id_for_label }}') || document.querySelector('[name="{{ form.vehicle.html_name }}"]');
+          let plate = '';
+          if (vehicleSelect && vehicleSelect.value) {
+            const opt = vehicleSelect.options[vehicleSelect.selectedIndex];
+            if (opt && opt.dataset && opt.dataset.plate) {
+              plate = (opt.dataset.plate || '').toUpperCase();
+            }
           }
+
+          const fd = new FormData();
+          fd.append('customer_id', customerId);
+          fd.append('order_type', 'service');
+          if (plate) fd.append('plate_number', plate);
+          fd.append('description', 'Order started for selected customer');
+
+          fetch('/tracker/api/orders/create-from-modal/', {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-CSRFToken': getCSRFToken() || '' }
+          })
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.success) {
+              const url = data.redirect_url || `/tracker/orders/started/${data.order_id}/`;
+              window.location.href = url;
+            } else {
+              alert(data && data.error ? data.error : 'Failed to start order');
+            }
+          })
+          .catch(err => {
+            alert('Error starting order: ' + (err && err.message ? err.message : err));
+          });
         });
       }
 
@@ -810,10 +827,10 @@
                     vehicle.license_plate ? `- ${vehicle.license_plate}` : ''
                   ].filter(Boolean).join(' ');
                   
-                  // Add option to select dropdown
                   const option = document.createElement('option');
                   option.value = vehicle.id;
                   option.textContent = vehicleLabel || 'Unnamed Vehicle';
+                  if (vehicle.license_plate) option.dataset.plate = vehicle.license_plate;
                   vehicleSelect.appendChild(option);
 
                   // Add vehicle card for display

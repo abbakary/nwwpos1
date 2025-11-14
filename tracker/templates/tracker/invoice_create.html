@@ -655,6 +655,7 @@
                     if (plate) fd.append('plate', plate);
                     const selOrder = document.querySelector('[name="selected_order_id_select"]');
                     if (selOrder && selOrder.value) fd.append('selected_order_id', selOrder.value);
+                    {% if customer %}fd.append('customer_id', '{{ customer.id }}');{% endif %}
 
                     setProgress(5);
                     uploadBtn.disabled = true;
@@ -685,7 +686,7 @@
                         throw new Error('Empty response from server');
                       }
 
-                      if (data.success === true){
+                      if (data.success === true && !data.mode){
                         errorBox.style.display='block';
                         errorBox.innerHTML='<i class="fa fa-check-circle text-success me-2"></i>Invoice created successfully! Redirecting...';
                         errorBox.className = 'alert alert-success mt-2';

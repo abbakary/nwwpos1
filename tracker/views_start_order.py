@@ -833,7 +833,7 @@ def api_create_order_from_modal(request):
                 )
 
         # Extract order details
-        order_type = request.POST.get('order_type', 'service').strip()
+        order_type = (request.POST.get('order_type') or request.POST.get('type') or 'service').strip()
         description = request.POST.get('description', '').strip()
         estimated_duration = request.POST.get('estimated_duration', '').strip()
         priority = request.POST.get('priority', 'medium').strip()
@@ -1093,4 +1093,39 @@ def api_started_orders_kpis(request):
         })
     except Exception as e:
         logger.error(f"Error fetching started orders KPIs: {e}")
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def api_quick_stop_order(request):
+    """
+    Stop a started order quickly (mark as completed) without signature.
+    Expects form body: order_id
+    Sets completed_at and completion_date, computes actual_duration.
+    """
+    try:
+        from django.utils import timezone
+        order_id = request.POST.get('order_id')
+        if not order_id:
+            return JsonResponse({'success': False, 'error': 'order_id is required'}, status=400)
+        user_branch = get_user_branch(request.user)
+        order = get_object_or_404(Order, id=int(order_id), branch=user_branch)
+
+        now = timezone.now()
+        if not order.started_at:
+            order.started_at = now
+        order.status = 'completed'
+        order.completed_at = now
+        order.completion_date = now
+        try:
+            reference = order.started_at or order.created_at or now
+            order.actual_duration = int(((now - reference).total_seconds()) // 60)
+        except Exception:
+            order.actual_duration = None
+
+        order.save(update_fields=['status','started_at','completed_at','completion_date','actual_duration'])
+        return JsonResponse({'success': True, 'order_id': order.id})
+    except Exception as e:
+        logger.error(f"Error quick-stopping order: {e}")
         return JsonResponse({'success': False, 'error': str(e)}, status=500)

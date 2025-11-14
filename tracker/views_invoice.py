@@ -145,9 +145,10 @@ def api_upload_extract_invoice(request):
             'ocr_available': extracted.get('ocr_available', False)
         })
 
-    # Get selected_order_id and plate from POST (commit path only)
+    # Get identifiers from POST (commit path only)
     selected_order_id = request.POST.get('selected_order_id') or None
     plate = (request.POST.get('plate') or '').strip().upper() or None
+    customer_id = request.POST.get('customer_id') or None
 
     # Try to load the selected order first
     selected_order = None
@@ -169,11 +170,18 @@ def api_upload_extract_invoice(request):
     # Determine customer to use
     customer_obj = None
 
-    # Priority 1: Use customer from selected order if available
+    # Priority 1: Use explicit customer_id if provided
+    if customer_id and not customer_obj:
+        try:
+            customer_obj = Customer.objects.get(id=int(customer_id), branch=user_branch)
+        except Exception:
+            customer_obj = None
+
+    # Priority 2: Use customer from selected order if available
     if selected_order and selected_order.customer:
         customer_obj = selected_order.customer
 
-    # Priority 2: Try to create/find customer using extracted data
+    # Priority 3: Try to create/find customer using extracted data
     if not customer_obj:
         cust_name = (header.get('customer_name') or '').strip()
         cust_phone = (header.get('phone') or '').strip()
@@ -222,7 +230,7 @@ def api_upload_extract_invoice(request):
                 logger.warning(f"Failed to create/get customer with deterministic phone: {e}")
                 customer_obj = None
 
-    # Priority 3: Try to find customer by plate number (via vehicles)
+    # Priority 4: Try to find customer by plate number (via vehicles)
     if not customer_obj and plate:
         try:
             vehicle = Vehicle.objects.filter(

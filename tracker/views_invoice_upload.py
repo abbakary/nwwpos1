@@ -172,7 +172,10 @@ def api_create_invoice_from_upload(request):
     
     try:
         with transaction.atomic():
-            # Collect basic customer fields
+            # Allow passing customer_id to reuse existing customer (avoid duplicates)
+            customer_id = request.POST.get('customer_id')
+            customer_obj = None
+
             customer_name = request.POST.get('customer_name', '').strip()
             customer_phone = request.POST.get('customer_phone', '').strip()
             customer_email = request.POST.get('customer_email', '').strip() or None
@@ -180,51 +183,54 @@ def api_create_invoice_from_upload(request):
             customer_type = request.POST.get('customer_type', 'personal')
             plate = (request.POST.get('plate') or '').strip().upper() or None
 
-            # Require minimum customer info
-            if not customer_name or not customer_phone:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Customer name and phone are required'
-                })
-
-            org_name = (request.POST.get('organization_name') or '').strip() or None
-            tax_num = (request.POST.get('tax_number') or '').strip() or None
-
-            # Use centralized service which does proper deduplication
-            # This method will:
-            # 1. Check if customer exists by name+phone+organization+tax (with phone normalization)
-            # 2. If found, update contact info and return existing customer
-            # 3. If NOT found, create new customer
-            try:
-                customer_obj, created = CustomerService.create_or_get_customer(
-                    branch=user_branch,
-                    full_name=customer_name,
-                    phone=customer_phone,
-                    email=customer_email,
-                    address=customer_address,
-                    customer_type=customer_type,
-                    organization_name=org_name,
-                    tax_number=tax_num,
-                    create_if_missing=True
-                )
-
-                if not customer_obj:
+            if customer_id:
+                try:
+                    customer_obj = Customer.objects.get(id=int(customer_id), branch=user_branch)
+                    logger.info(f"Using existing customer for invoice upload: {customer_obj.id}")
+                except (Customer.DoesNotExist, ValueError):
+                    return JsonResponse({'success': False, 'message': 'Selected customer not found'})
+            else:
+                # Require minimum customer info only when creating/looking up by details
+                if not customer_name or not customer_phone:
                     return JsonResponse({
                         'success': False,
-                        'message': 'Failed to create or find customer'
+                        'message': 'Customer name and phone are required'
                     })
 
-                if created:
-                    logger.info(f"Created new customer from invoice upload: {customer_obj.id} - {customer_name}")
-                else:
-                    logger.info(f"Found existing customer for invoice upload: {customer_obj.id} - {customer_name}")
+                org_name = (request.POST.get('organization_name') or '').strip() or None
+                tax_num = (request.POST.get('tax_number') or '').strip() or None
 
-            except Exception as e:
-                logger.error(f"Error in customer creation/lookup for invoice: {e}")
-                return JsonResponse({
-                    'success': False,
-                    'message': f'Error processing customer: {str(e)}'
-                })
+                # Use centralized service which does proper deduplication
+                try:
+                    customer_obj, created = CustomerService.create_or_get_customer(
+                        branch=user_branch,
+                        full_name=customer_name,
+                        phone=customer_phone,
+                        email=customer_email,
+                        address=customer_address,
+                        customer_type=customer_type,
+                        organization_name=org_name,
+                        tax_number=tax_num,
+                        create_if_missing=True
+                    )
+
+                    if not customer_obj:
+                        return JsonResponse({
+                            'success': False,
+                            'message': 'Failed to create or find customer'
+                        })
+
+                    if created:
+                        logger.info(f"Created new customer from invoice upload: {customer_obj.id} - {customer_name}")
+                    else:
+                        logger.info(f"Found existing customer for invoice upload: {customer_obj.id} - {customer_name}")
+
+                except Exception as e:
+                    logger.error(f"Error in customer creation/lookup for invoice: {e}")
+                    return JsonResponse({
+                        'success': False,
+                        'message': f'Error processing customer: {str(e)}'
+                    })
 
             # Get or create vehicle if plate provided
             vehicle = None

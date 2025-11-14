@@ -2984,6 +2984,10 @@ def customer_detail(request: HttpRequest, pk: int):
 
     # Scope orders to user's branch for proper filtering
     orders = scope_queryset(customer.orders.all(), request.user, request).order_by('-created_at')
+    try:
+        started_order = orders.filter(status='created').first()
+    except Exception:
+        started_order = None
     vehicles = customer.vehicles.all()
     notes = customer.note_entries.all().order_by('-created_at')
     invoices = customer.invoices.all().order_by('-invoice_date', '-created_at')
@@ -2994,6 +2998,7 @@ def customer_detail(request: HttpRequest, pk: int):
         'vehicles': vehicles,
         'notes': notes,
         'invoices': invoices,
+        'started_order_id': getattr(started_order, 'id', None),
     })
 
 

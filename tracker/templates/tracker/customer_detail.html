@@ -630,7 +630,7 @@
                                     <th>Date</th>
                                     <th>Order</th>
                                     <th class="text-end">Total</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-end">Document</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -647,18 +647,12 @@
                                     </td>
                                     <td class="text-end"><strong>{{ inv.total_amount|floatformat:2 }}</strong></td>
                                     <td class="text-end">
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{% url 'tracker:invoice_detail' pk=inv.id %}" class="btn btn-outline-primary" title="View"><i class="fa fa-eye"></i></a>
-                                            <a href="{% url 'tracker:invoice_print' pk=inv.id %}" target="_blank" class="btn btn-outline-secondary" title="Print"><i class="fa fa-print"></i></a>
-                                            <form method="post" action="{% url 'tracker:invoice_pdf' pk=inv.id %}" style="display:inline;">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-outline-success" title="PDF"><i class="fa fa-file-pdf"></i></button>
-                                            </form>
-                                            {% if inv.document %}
-                                                <a href="{% url 'tracker:invoice_document_view' pk=inv.id %}" target="_blank" class="btn btn-outline-info" title="Open Document"><i class="fa fa-external-link-alt"></i></a>
-                                                <a href="{% url 'tracker:invoice_document_download' pk=inv.id %}" class="btn btn-outline-dark" title="Download"><i class="fa fa-download"></i></a>
-                                            {% endif %}
-                                        </div>
+                                        {% if inv.document %}
+                                            <a href="{% url 'tracker:invoice_document_view' pk=inv.id %}" target="_blank" class="btn btn-outline-info btn-sm"><i class="fa fa-external-link-alt me-1"></i>Open Document</a>
+                                            <a href="{% url 'tracker:invoice_document_download' pk=inv.id %}" class="btn btn-outline-dark btn-sm"><i class="fa fa-download me-1"></i>Download</a>
+                                        {% else %}
+                                            —
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -769,6 +763,31 @@
                 </ul>
             </div>
         </div>
+        <div class="px-3 pt-2">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Vehicle Plate</label>
+                    {% with first_vehicle=customer.vehicles.first %}
+                    <input type="text" id="quickStartPlate" class="form-control" value="{% if first_vehicle %}{{ first_vehicle.plate_number }}{% endif %}" placeholder="e.g., ABC-1234" style="text-transform: uppercase;" />
+                    {% endwith %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-medium">Quick Start</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="quickStartBtn" class="btn btn-sm btn-primary">
+                            <i class="fa fa-play me-1"></i>Start Order
+                        </button>
+                        <button type="button" id="quickStopBtn" class="btn btn-sm btn-outline-danger">
+                            <i class="fa fa-stop me-1"></i>Stop Order
+                        </button>
+                    </div>
+                    {% if started_order_id %}<input type="hidden" id="startedOrderId" value="{{ started_order_id }}" />{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <small class="text-muted">Start captures time; Stop marks order completed.</small>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
             {% if orders %}
                 <div class="table-responsive">
@@ -860,6 +879,64 @@
         </div>
     </div>
 </div>
+
+<script>
+  (function(){
+    function getCSRF(){
+      const name='csrftoken';
+      const cookies=document.cookie?document.cookie.split(';'):[];
+      for(let i=0;i<cookies.length;i++){const c=cookies[i].trim();if(c.substring(0,name.length+1)===(name+'=')){return decodeURIComponent(c.substring(name.length+1));}}
+      return '';
+    }
+    const plateEl=document.getElementById('quickStartPlate');
+    const startBtn=document.getElementById('quickStartBtn');
+    const stopBtn=document.getElementById('quickStopBtn');
+    const startedOrderEl=document.getElementById('startedOrderId');
+    function currentStarted(){return startedOrderEl && startedOrderEl.value ? parseInt(startedOrderEl.value,10):null;}
+
+    if(startBtn){
+      startBtn.addEventListener('click',function(){
+        const plate=(plateEl && plateEl.value?plateEl.value:'').trim().toUpperCase();
+        if(!plate){ alert('Enter plate to start order'); return; }
+        const payload={
+          plate_number: plate,
+          order_type: 'service',
+          use_existing_customer: true,
+          existing_customer_id: {{ customer.id }}
+        };
+        fetch('/tracker/api/orders/start/',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-CSRFToken':getCSRF()},
+          body:JSON.stringify(payload)
+        }).then(r=>r.json()).then(data=>{
+          if(data && data.success){
+            // Reload so the new started order appears in all sections
+            window.location.reload();
+          } else {
+            alert(data && data.error ? data.error : 'Failed to start order');
+          }
+        }).catch(e=>alert('Error: '+(e && e.message?e.message:e)));
+      });
+    }
+
+    if(stopBtn){
+      stopBtn.addEventListener('click',function(){
+        const id=currentStarted();
+        if(!id){ alert('No started order found for this customer'); return; }
+        const fd=new FormData();
+        fd.append('order_id', String(id));
+        fetch('/tracker/api/orders/quick-stop/',{
+          method:'POST',
+          body:fd,
+          headers:{'X-CSRFToken':getCSRF()}
+        }).then(r=>r.json()).then(data=>{
+          if(data && data.success){ window.location.reload(); }
+          else { alert(data && data.error ? data.error : 'Failed to stop order'); }
+        }).catch(e=>alert('Error: '+(e && e.message?e.message:e)));
+      });
+    }
+  })();
+</script>
 
 <!-- Add Vehicle Modal -->
 <div class="modal fade" id="addVehicleModal" tabindex="-1">
