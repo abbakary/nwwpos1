@@ -500,7 +500,6 @@ class OrderForm(forms.ModelForm):
             "vehicle": forms.Select(attrs={'class': 'form-select'}),
             "priority": forms.Select(attrs={'class': 'form-select'}),
             "description": forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe the issue or service needed'}),
-            "estimated_duration": forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             "item_name": forms.Select(attrs={'class': 'form-select'}),
             "brand": forms.Select(attrs={'class': 'form-select'}),
             "quantity": forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
