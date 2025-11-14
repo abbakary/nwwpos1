@@ -3343,6 +3343,13 @@ def complete_order(request: HttpRequest, pk: int):
     reference_time = o.started_at or o.created_at
     o.actual_duration = int(max(0, (now - reference_time).total_seconds() // 60))
 
+    # Calculate estimated_duration using working hours (8 AM - 5 PM)
+    if o.started_at:
+        from .utils.time_utils import calculate_estimated_duration
+        estimated_mins = calculate_estimated_duration(o.started_at, o.completed_at)
+        if estimated_mins is not None:
+            o.estimated_duration = estimated_mins
+
     if o.type == 'sales' and (o.quantity or 0) > 0 and o.item_name and o.brand:
         from .utils import adjust_inventory
         adjust_inventory(o.item_name, o.brand, (o.quantity or 0))
