@@ -522,14 +522,11 @@ class OrderForm(forms.ModelForm):
             # Keep empty choices on error
             self.fields['service_selection'].choices = []
 
-        # Dynamic service addons from DB, attach durations mapping for front-end
+        # Dynamic service addons from DB
         try:
             addon_qs = ServiceAddon.objects.filter(is_active=True).order_by('name')
             addon_choices = [(a.name, a.name) for a in addon_qs]
-            addon_durations_map = {a.name: int(a.estimated_minutes or 0) for a in addon_qs}
             self.fields['tire_services'].choices = addon_choices
-            # Attach mapping for JS to consume
-            self.fields['tire_services'].widget.attrs['data-addon-durations'] = json.dumps(addon_durations_map)
         except Exception:
             # Keep empty choices on error
             self.fields['tire_services'].choices = []
