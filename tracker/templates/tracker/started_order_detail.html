@@ -1393,21 +1393,13 @@
 
                   // Validate required fields
                   const customerName = this.querySelector('input[name="customer_name"]');
-                  const customerPhone = this.querySelector('input[name="customer_phone"]');
                   const customerType = this.querySelector('select[name="customer_type"]');
                   const totalAmount = this.querySelector('input[name="total_amount"]');
-                  const orderType = this.querySelector('input[name="order_type"]:checked');
 
-                  if (!customerName || !customerName.value.trim() || 
-                      !customerPhone || !customerPhone.value.trim() || 
-                      !customerType || !customerType.value.trim() || 
+                  if (!customerName || !customerName.value.trim() ||
+                      !customerType || !customerType.value.trim() ||
                       !totalAmount || !totalAmount.value.trim()){
-                    showError('<i class="fa fa-warning me-2"></i>Please fill in customer name, phone, customer type, and total amount.');
-                    return;
-                  }
-
-                  if (!orderType){
-                    showError('<i class="fa fa-warning me-2"></i>Please select an order type (Service or Sales).');
+                    showError('<i class="fa fa-warning me-2"></i>Please fill in customer name, customer type, and total amount.');
                     return;
                   }
 
