@@ -463,51 +463,16 @@
                           </div>
                         </div>
 
-                        <hr>
-
-                        <!-- Order Type Selection -->
-                        <div class="mb-3">
-                          <label class="form-label fw-bold">Order Type *</label>
-                          <div class="btn-group w-100" role="group">
-                            <input type="radio" class="btn-check order-type-option" name="order_type" id="orderTypeService" value="service" required>
-                            <label class="btn btn-outline-primary" for="orderTypeService">
-                              <i class="fa fa-hammer me-2"></i>Service
-                            </label>
-
-                            <input type="radio" class="btn-check order-type-option" name="order_type" id="orderTypeSales" value="sales" required>
-                            <label class="btn btn-outline-primary" for="orderTypeSales">
-                              <i class="fa fa-shopping-bag me-2"></i>Sales
-                            </label>
+                        <!-- Services/Add-ons Section (Optional) -->
+                        <div class="card mb-3">
+                          <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fa fa-list-check me-2"></i>Services/Add-ons (Optional)</h6>
                           </div>
-                        </div>
-
-                        <!-- Service Order Type Section -->
-                        <div id="serviceOrderSection" style="display:none;" class="mb-3">
-                          <div class="card border-success">
-                            <div class="card-header bg-success text-white">
-                              <h6 class="mb-0"><i class="fa fa-list-check me-2"></i>Service Offered</h6>
+                          <div class="card-body">
+                            <div class="row g-2" id="serviceTypesContainer">
+                              <!-- Service checkboxes will be loaded here -->
                             </div>
-                            <div class="card-body">
-                              <div class="row g-2" id="serviceTypesContainer">
-                                <!-- Service checkboxes will be loaded here -->
-                              </div>
-                              <div class="small text-muted mt-2" id="serviceEtaHint" style="display:none;"></div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <!-- Sales Order Type Section -->
-                        <div id="salesOrderSection" style="display:none;" class="mb-3">
-                          <div class="card border-warning">
-                            <div class="card-header bg-warning text-dark">
-                              <h6 class="mb-0"><i class="fa fa-list-check me-2"></i>Tire Service Add-ons</h6>
-                            </div>
-                            <div class="card-body">
-                              <div class="row g-2" id="addonTypesContainer">
-                                <!-- Addon checkboxes will be loaded here -->
-                              </div>
-                              <div class="small text-muted mt-2" id="addonEtaHint" style="display:none;"></div>
-                            </div>
+                            <div class="small text-muted mt-2" id="serviceEtaHint" style="display:none;"></div>
                           </div>
                         </div>
 
