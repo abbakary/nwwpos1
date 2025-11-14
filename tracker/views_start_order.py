@@ -150,10 +150,10 @@ def api_start_order(request):
             if service_selection:
                 desc += ": " + ", ".join(service_selection)
 
-            # Create the order only if one doesn't already exist for this vehicle
+            # Create the order only if one doesn't already exist for this vehicle in progress
             existing_order = Order.objects.filter(
                 vehicle=vehicle,
-                status='created'
+                status='in_progress'
             ).first()
 
             if existing_order:
