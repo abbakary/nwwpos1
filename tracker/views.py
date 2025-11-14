@@ -2985,7 +2985,7 @@ def customer_detail(request: HttpRequest, pk: int):
     # Scope orders to user's branch for proper filtering
     orders = scope_queryset(customer.orders.all(), request.user, request).order_by('-created_at')
     try:
-        started_order = orders.filter(status='created').first()
+        started_order = orders.filter(status='in_progress').first()
     except Exception:
         started_order = None
     vehicles = customer.vehicles.all()
