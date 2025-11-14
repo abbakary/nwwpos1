@@ -582,10 +582,13 @@ def parse_invoice_data(text: str) -> dict:
             candidate_lines = []
             for ln in lines:
                 if re.search(r'\d{3,}\s*[/\-]\s*\d{3,}', ln):
-                    # Exclude typical non-phone rows
-                    if re.search(r'PI\b|Invoice|Gross|Net|VAT|TSH|Qty|Rate|Value|Code|Sr\b|No\.', ln, re.I):
+                    # Exclude typical non-phone rows and product specs
+                    if re.search(r'PI\b|Invoice|Gross|Net|VAT|TSH|Qty|Rate|Value|Code|Sr\b|No\.|LT\d+|TR\d+|TYRE|TIRE|WHEEL', ln, re.I):
                         continue
-                    candidate_lines.append(ln.strip())
+                    # Check if it looks like a phone (has phone-like patterns)
+                    # Phone numbers are shorter than product codes, usually less than 20 chars
+                    if len(ln) < 20:
+                        candidate_lines.append(ln.strip())
             if candidate_lines:
                 # Choose the first plausible line
                 phone = candidate_lines[0]
