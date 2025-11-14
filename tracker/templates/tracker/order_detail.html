@@ -1185,6 +1185,12 @@
   }
 
   function ensureAndSubmit(){
+    // Capture the reason from signature modal if provided
+    const reasonField = document.getElementById('signatureReasonField');
+    if (reasonField && reasonField.value) {
+      if (hiddenOverrun) hiddenOverrun.value = reasonField.value;
+    }
+
     if (!needsOverrun()){
       completeForm.submit();
       return;
