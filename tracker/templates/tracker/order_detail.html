@@ -1004,7 +1004,7 @@
       </div>
 
       <!-- Additional Info -->
-      {% if order.signed_by or order.completion_date %}
+      {% if order.signed_by or order.completion_date or order.overrun_reason %}
       <div class="card shadow-sm">
         <div class="card-header bg-light">
           <h6 class="mb-0"><i class="fa fa-info me-2"></i>Additional Information</h6>
@@ -1017,9 +1017,15 @@
           </div>
           {% endif %}
           {% if order.completion_date %}
-          <div class="mb-0">
+          <div class="mb-3">
             <small class="text-muted d-block">Completion Date</small>
             <div class="fw-medium">{{ order.completion_date|date_medium }}</div>
+          </div>
+          {% endif %}
+          {% if order.overrun_reason %}
+          <div class="mb-0">
+            <small class="text-muted d-block fw-bold"><i class="fa fa-clock me-1 text-warning"></i>Reason for Delay</small>
+            <div class="fw-medium text-dark mt-1 p-2 bg-warning bg-opacity-10 rounded">{{ order.overrun_reason }}</div>
           </div>
           {% endif %}
         </div>
