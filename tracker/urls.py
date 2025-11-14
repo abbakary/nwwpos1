@@ -155,6 +155,7 @@ urlpatterns = [
 
 
     # Invoices - Upload only
+    path("invoices/upload/", views_invoice.invoice_upload, name="invoice_upload"),
     path("api/invoices/upload-extract/", views_invoice.api_upload_extract_invoice, name="api_upload_extract_invoice"),
 
     # Invoice upload (two-step process)
