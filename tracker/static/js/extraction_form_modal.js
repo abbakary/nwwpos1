@@ -188,29 +188,6 @@ class ExtractionFormModal {
     });
   }
 
-  updateExtractedDuration() {
-    const hint = document.getElementById('extractionEtaHint');
-    const durationInput = document.querySelector('input[name="extracted_estimated_duration"]');
-    let total = 0;
-
-    document.querySelectorAll('.extraction-service-checkbox:checked').forEach(cb => {
-      const m = parseInt(cb.getAttribute('data-minutes') || '0', 10);
-      if (!isNaN(m)) total += m;
-    });
-
-    if (durationInput && total > 0) {
-      durationInput.value = String(total);
-    }
-
-    if (hint) {
-      if (total > 0) {
-        hint.style.display = 'block';
-        hint.textContent = `Estimated total time: ${total} minutes`;
-      } else {
-        hint.style.display = 'none';
-      }
-    }
-  }
 
   validateStep(stepNumber) {
     this.clearAllErrors();
