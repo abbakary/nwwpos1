@@ -300,15 +300,15 @@ def started_orders_dashboard(request):
         orders_by_plate[plate].append(order)
 
     # Calculate statistics
-    # Include all started orders for accurate counts
+    # Include all started orders for accurate counts (status='in_progress' means started)
     total_started = Order.objects.filter(
         branch=user_branch,
-        status='created'
+        status='in_progress'
     ).count()
 
     today_started = Order.objects.filter(
         branch=user_branch,
-        status='created',
+        status='in_progress',
         started_at__date=timezone.now().date()
     ).count()
 
@@ -316,7 +316,7 @@ def started_orders_dashboard(request):
     from django.db.models import Count
     today_orders = Order.objects.filter(
         branch=user_branch,
-        status='created',
+        status='in_progress',
         started_at__date=timezone.now().date(),
         vehicle__isnull=False
     ).values('vehicle__plate_number').annotate(order_count=Count('id')).filter(order_count__gte=2)
