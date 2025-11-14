@@ -122,7 +122,8 @@ def api_extract_invoice_preview(request):
                 'qty': int(item.get('qty', 1)) if isinstance(item.get('qty'), (int, float)) else 1,
                 'unit': item.get('unit'),
                 'code': item.get('code'),
-                'value': float(item.get('value') or 0)
+                'value': float(item.get('value') or 0),
+                'rate': float(item.get('rate') or 0)
             }
             for item in items
         ],
